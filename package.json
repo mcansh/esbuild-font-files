@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "del ./dist && ./build.js"
+  },
+  "devDependencies": {
+    "del-cli": "^5.0.0",
+    "esbuild": "^0.15.6"
+  },
+  "dependencies": {
+    "@fontsource/aguafina-script": "^4.5.9"
+  }
+}
