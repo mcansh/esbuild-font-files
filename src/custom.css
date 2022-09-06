@@ -1,3 +1,5 @@
+@import url(./third.css);
+
 .relative-url {
   list-style: square url(./bare-bones.png);
 }

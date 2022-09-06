@@ -54,7 +54,7 @@ let OUT_DIR = path.join(process.cwd(), "public/build");
  * @param {import('esbuild').BuildOptions} config
  */
 async function doTheBuild(config, name) {
-  console.log(kleur.cyan().bold(`[${name}] building...`));
+  console.log(kleur.cyan().bold(`building [${name}]...`));
 
   let start = Date.now();
   let result = await esbuild.build({ ...config, write: false });
@@ -68,6 +68,7 @@ async function doTheBuild(config, name) {
     await fse.outputFile(file.path, file.contents);
     console.log(
       "👉",
+      kleur.cyan().bold(`[${name}]`),
       kleur.green(path.relative(process.cwd(), file.path)),
       kleur.dim(prettyBytes(file.contents.byteLength))
     );
@@ -75,7 +76,7 @@ async function doTheBuild(config, name) {
 
   let duration = prettyMs(end - start);
 
-  console.log(kleur.cyan().bold(`[${name}] built in ${duration}`));
+  console.log(kleur.cyan().bold(`✅ [${name}] built in ${duration}`));
 
   return result;
 }
