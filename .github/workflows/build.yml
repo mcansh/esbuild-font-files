@@ -10,6 +10,9 @@ jobs:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
 
+      - name: 📦 Set up pnpm
+        uses: pnpm/action-setup@v2
+
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
