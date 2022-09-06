@@ -91,6 +91,7 @@ async function build() {
   await doTheBuild(
     {
       entryPoints,
+      absWorkingDir: process.cwd(),
       outdir: OUT_DIR,
       splitting: true,
       bundle: true,
@@ -132,13 +133,12 @@ function bundleCssPlugin() {
             entryPoints: [args.path],
             assetNames: "[name]-[hash]",
             entryNames: "[dir]/[name]-[hash]",
-            publicPath: ".",
             loader: {
               ...buildOptions.loader,
               ".css": "css",
             },
             metafile: true,
-            plugins: [],
+            plugins: [bundleImportsPlugin()],
           },
           "css"
         );
@@ -156,6 +156,33 @@ function bundleCssPlugin() {
             path.basename(entry)
           )}";`,
           loader: "js",
+        };
+      });
+    },
+  };
+}
+
+/** @returns {import('esbuild').Plugin} */
+function bundleImportsPlugin() {
+  return {
+    name: "bundle-imports",
+    setup(build) {
+      let extensions = [
+        ".woff2",
+        ".woff",
+        ".ttf",
+        ".eot",
+        ".svg",
+        ".png",
+        ".jpg",
+        ".gif",
+      ];
+      let filter = new RegExp(extensions.join("|"));
+      build.onResolve({ filter }, (args) => {
+        let absPath = path.resolve(args.resolveDir, args.path);
+        return {
+          path: absPath.slice(build.initialOptions.absWorkingDir.length),
+          external: true,
         };
       });
     },
