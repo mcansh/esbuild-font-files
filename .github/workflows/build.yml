@@ -12,6 +12,8 @@ jobs:
 
       - name: 📦 Set up pnpm
         uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
