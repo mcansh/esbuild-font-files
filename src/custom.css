@@ -1,3 +1,7 @@
+.relative-url {
+  list-style: square url(./bare-bones.png);
+}
+
 .id-url {
   background-image: url("#id");
 }
