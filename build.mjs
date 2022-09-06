@@ -54,7 +54,7 @@ let OUT_DIR = path.join(process.cwd(), "public/build");
  * @param {import('esbuild').BuildOptions} config
  */
 async function doTheBuild(config, name) {
-  console.log(kleur.cyan().bold(`building [${name}]...`));
+  console.log(kleur.cyan().bold(`[${name}] building...`));
 
   let start = Date.now();
   let result = await esbuild.build({ ...config, write: false });
@@ -68,7 +68,6 @@ async function doTheBuild(config, name) {
     await fse.outputFile(file.path, file.contents);
     console.log(
       "👉",
-      kleur.cyan().bold(`[${name}]`),
       kleur.green(path.relative(process.cwd(), file.path)),
       kleur.dim(prettyBytes(file.contents.byteLength))
     );
@@ -92,6 +91,7 @@ async function build() {
   await doTheBuild(
     {
       entryPoints,
+      absWorkingDir: process.cwd(),
       outdir: OUT_DIR,
       splitting: true,
       bundle: true,
@@ -118,22 +118,27 @@ function bundleCssPlugin() {
       build.onLoad({ filter: /\.css$/ }, async (args) => {
         let { outfile, outdir, assetNames } = buildOptions;
         let assetDirname = path.dirname(assetNames);
-
         let result = await doTheBuild(
           {
             ...buildOptions,
+            minifySyntax: false,
+            incremental: false,
+            splitting: false,
+            sourcemap: false,
+            write: false,
             outdir: path.join(
               outfile ? path.dirname(outfile) : outdir,
               assetDirname
             ),
             entryPoints: [args.path],
-            publicPath: ".",
+            assetNames: "[name]-[hash]",
+            entryNames: "[dir]/[name]-[hash]",
             loader: {
               ...buildOptions.loader,
               ".css": "css",
             },
             metafile: true,
-            plugins: [],
+            plugins: [bundleImportsPlugin()],
           },
           "css"
         );
@@ -144,10 +149,6 @@ function bundleCssPlugin() {
           return !!entryPoint;
         });
 
-        if (!entry) {
-          throw new Error("could not find entry point");
-        }
-
         return {
           contents: `export default "${path.join(
             buildOptions.publicPath,
@@ -155,6 +156,33 @@ function bundleCssPlugin() {
             path.basename(entry)
           )}";`,
           loader: "js",
+        };
+      });
+    },
+  };
+}
+
+/** @returns {import('esbuild').Plugin} */
+function bundleImportsPlugin() {
+  return {
+    name: "bundle-imports",
+    setup(build) {
+      let extensions = [
+        ".woff2",
+        ".woff",
+        ".ttf",
+        ".eot",
+        ".svg",
+        ".png",
+        ".jpg",
+        ".gif",
+      ];
+      let filter = new RegExp(extensions.join("|"));
+      build.onResolve({ filter }, (args) => {
+        let absPath = path.resolve(args.resolveDir, args.path);
+        return {
+          path: absPath.slice(build.initialOptions.absWorkingDir.length),
+          external: true,
         };
       });
     },
