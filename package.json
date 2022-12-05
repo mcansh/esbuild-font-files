@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.15.6",
-    "fs-extra": "^10.1.0",
+    "fs-extra": "^11.1.0",
     "pretty-bytes": "^6.0.0",
     "pretty-ms": "^8.0.0"
   }
