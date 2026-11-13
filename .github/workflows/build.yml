@@ -13,6 +13,7 @@ jobs:
       - name: 📦 Set up pnpm
         uses: pnpm/action-setup@v2
         with:
+          dest: ~/.ci/setup-pnpm
           version: latest
 
       - name: ⎔ Setup node
